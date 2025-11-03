@@ -1,14 +1,28 @@
 flowchart TD
-  Start[Landing Page]
-  SignUpPage[Sign Up Page]
-  SignInPage[Sign In Page]
-  AuthAPI[Authentication API Endpoint]
-  DashboardPage[Dashboard Page]
-  Start -->|Select Sign Up| SignUpPage
-  Start -->|Select Sign In| SignInPage
-  SignUpPage -->|Submit Credentials| AuthAPI
-  SignInPage -->|Submit Credentials| AuthAPI
-  AuthAPI -->|Success| DashboardPage
-  AuthAPI -->|Error| SignUpPage
-  AuthAPI -->|Error| SignInPage
-  DashboardPage -->|Click Logout| Start
+    Start[User opens app]
+    WalletConnect[Connect wallet via RainbowKit]
+    MoodInput[Select mood gesture]
+    SubmitMood[Submit mood to backend]
+    StoreMood[Log mood in PostgreSQL]
+    StreakCalc[Calculate user streak]
+    Milestone{Streak milestone reached}
+    MintNFT[Mint NFT badge via Alchemy]
+    SkipMint[No NFT minted]
+    Leaderboard[Fetch leaderboard from Redis]
+    Dashboard[Render dashboard with chart and leaderboard]
+    Frame[Generate Farcaster Frame OG image]
+    End[End]
+
+    Start --> WalletConnect
+    WalletConnect --> MoodInput
+    MoodInput --> SubmitMood
+    SubmitMood --> StoreMood
+    StoreMood --> StreakCalc
+    StreakCalc --> Milestone
+    Milestone -- Yes --> MintNFT
+    Milestone -- No --> SkipMint
+    MintNFT --> Leaderboard
+    SkipMint --> Leaderboard
+    Leaderboard --> Dashboard
+    Dashboard --> Frame
+    Frame --> End

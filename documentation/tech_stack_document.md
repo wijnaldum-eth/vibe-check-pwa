@@ -1,90 +1,107 @@
-# Tech Stack Document
+# Tech Stack Document for Vibe Check PWA
 
-This document explains the key technologies chosen for the **codeguide-starter** project. It’s written in everyday language so anyone—technical or not—can understand why each tool was picked and how it supports the application.
+This document explains the technology choices behind the Vibe Check Progressive Web App (PWA) in everyday language. It covers how each piece of the stack works together to deliver a fast, reliable, and user-friendly crypto sentiment tracker.
 
 ## 1. Frontend Technologies
-The frontend is everything the user sees and interacts with. For this project, we’ve used:
+These are the tools and libraries that shape what you see and interact with in your browser or on your phone.
 
 - **Next.js (App Router)**
-  - A React framework that makes page routing, server-side rendering, and API routes very simple.
-  - Enhances user experience by pre-rendering pages on the server or at build time, leading to faster initial load.
-- **React 18**
-  - The underlying library for building user interfaces with reusable components.
-  - Provides a smooth, interactive experience thanks to its virtual DOM and modern hooks.
-- **TypeScript**
-  - A superset of JavaScript that adds types (labels for data).
-  - Helps catch errors early during development and makes the code easier to maintain.
-- **CSS (globals.css & theme.css)**
-  - **globals.css** applies base styles (fonts, colors, resets) across the entire app.
-  - **dashboard/theme.css** defines the look and feel specific to the dashboard area.
-  - This separation keeps styles organized and avoids accidental style conflicts.
+  • A popular framework for building React applications. It handles page routing, server-side rendering, and optimizes for speed.  
+  • Enables the PWA features (offline support, fast load times) out of the box.
 
-By combining these tools, we have a clear structure (Next.js folders for pages and layouts), safer code (TypeScript), and flexible styling with vanilla CSS.
+- **Progressive Web App Features**
+  • **Service Workers**: Scripts that run in the background to cache assets and enable offline usage.  
+  • **Web Manifest**: A simple JSON file that makes the app installable on mobile devices.
+
+- **UI Library & Styling**
+  • **shadcn/ui**: A collection of ready-to-use user interface components (buttons, cards, dialogs) that speed up development.  
+  • **Tailwind CSS**: A utility-first CSS framework for quickly styling components and applying a consistent dark-mode-first design.
+
+- **Charting**
+  • **Recharts**: A chart library built on React to visualize your mood trends with simple line and area charts.
+
+- **Wallet Connection**
+  • **RainbowKit** and **wagmi**: Easy-to-use packages that let users sign in with their Ethereum-compatible wallets (Metamask, WalletConnect, etc.) instead of passwords.
 
 ## 2. Backend Technologies
-The backend handles data, user accounts, and the logic behind the scenes. Our choices here are:
+These components handle data storage, business logic, and communication with external services behind the scenes.
 
-- **Next.js API Routes**
-  - Allows us to write server-side code (`route.ts` files) alongside our frontend in the same project.
-  - Runs on Node.js, so we can handle requests like sign-up, sign-in, and data fetching in one place.
-- **Node.js Runtime**
-  - The JavaScript environment on the server that executes our API routes.
-- **bcrypt** (npm package)
-  - A library for hashing passwords securely before storing them.
-  - Ensures that even if someone got access to our data, raw passwords aren’t visible.
-- **(Optional) NextAuth.js or JWT**
-  - While this starter kit shows a custom authentication flow, it can easily integrate services like NextAuth.js for email-based login or JWT (JSON Web Tokens) for stateless sessions.
+- **Monorepo with pnpm Workspaces**
+  • Organizes related code in one repository but across separate packages:  
+    - `apps/web` (Next.js frontend)  
+    - `apps/api` (Express + tRPC backend)  
+    - `contracts` (smart contract code)  
+    - `packages/shared` (common TypeScript types)
 
-These components work together to receive user credentials, verify or store them securely, manage sessions or tokens, and deliver protected data back to the frontend.
+- **Express.js**
+  • A lightweight web server framework for Node.js that handles incoming requests and routes them to the right code.
+
+- **tRPC**
+  • Builds a type-safe API layer between frontend and backend. It ensures that both sides share the same data definitions, reducing errors.
+
+- **PostgreSQL (with Drizzle ORM)**
+  • A reliable relational database to store user profiles (by wallet address), daily mood logs, and streak information.  
+  • Drizzle ORM provides a simple, typed interface to read and write data.
+
+- **Redis Cache**
+  • An in-memory data store used to speed up frequent reads, such as the global consistency leaderboard and aggregated network sentiment.
 
 ## 3. Infrastructure and Deployment
-Infrastructure covers where and how we host the app, as well as how changes get delivered:
+These choices ensure the app is easy to run, scales well, and stays up-to-date automatically.
 
-- **Git & GitHub**
-  - Version control system (Git) and remote hosting (GitHub) keep track of all code changes and allow team collaboration.
-- **Vercel (or Netlify)**
-  - A popular hosting service optimized for Next.js, with one-click deployments and global content delivery.
-  - Automatically rebuilds and deploys the site whenever code is pushed to the main branch.
-- **GitHub Actions (CI/CD)**
-  - Automates tasks like linting (ESLint), formatting (Prettier), and running any tests you add.
-  - Ensures that only clean, tested code goes live.
+- **Containerization**
+  • **Docker** and **docker-compose**: Package the frontend, backend, database, and cache into isolated containers that run the same way on any machine.
 
-Together, these tools provide a reliable, scalable setup where every code change is tested and deployed quickly, with minimal manual work.
+- **Version Control**
+  • **Git** (hosted on GitHub): Tracks code changes and supports collaboration.
+
+- **Continuous Integration / Continuous Deployment (CI/CD)**
+  • **GitHub Actions**: Automates testing and deployment whenever code is pushed or merged.  
+  • **Akash SDL (`akash-deploy.yml`)**: Defines how the services should run in a production environment on the Akash network.
+
+- **Reverse Proxy**
+  • **Nginx**: Routes incoming web traffic to the correct container (frontend or backend) and handles SSL termination.
 
 ## 4. Third-Party Integrations
-While this starter kit is minimal by design, it already includes or can easily add:
+These external services extend core functionality without building everything from scratch.
 
-- **bcrypt**
-  - For secure password hashing (included as an npm dependency).
-- **NextAuth.js** (optional)
-  - A full-featured authentication library supporting email/password, OAuth, and more.
-- **Sentry or LogRocket** (optional)
-  - For real-time error tracking and performance monitoring in production.
+- **Alchemy SDK**
+  • Connects to the Base L2 network to mint ERC-721 NFT badges when users hit mood streak milestones.
 
-These integrations help extend the app’s capabilities without building every feature from scratch.
+- **Neynar API**
+  • Fetches a user’s Farcaster social graph to calculate and display network sentiment in real time.
+
+- **Farcaster Frames**
+  • Generates customized Open Graph images on the fly for each user’s mood and streak. These images are shareable in Farcaster posts.
 
 ## 5. Security and Performance Considerations
-We’ve baked in several measures to keep users safe and the app running smoothly:
+This section outlines the measures taken to protect user data and keep the app running smoothly.
 
-Security:
-- Passwords are never stored in plain text—bcrypt hashes them with a random salt.
-- API routes can implement CSRF protection and input validation to block malicious requests.
-- Session tokens or cookies are marked secure and HttpOnly to prevent theft via JavaScript.
+- **Authentication & Data Protection**
+  • Wallet-based login eliminates passwords and ties identity directly to on-chain addresses.  
+  • All inputs are validated on the server side to prevent malicious requests.  
+  • Rate limiting on key API endpoints to guard against abuse.
 
-Performance:
-- Server-side rendering (SSR) and static site generation (SSG) in Next.js deliver pages faster.
-- Code splitting and lazy-loaded components ensure users only download what they need.
-- Global CSS and theme files are small and cached by the browser for quick repeat visits.
+- **Smart Contract Audit**
+  • Before deploying the ERC-721 badge contract to the Base mainnet, a professional audit will ensure there are no security vulnerabilities.
 
-These strategies work together to give users a fast, secure experience every time.
+- **Caching & Load Optimization**
+  • Redis cache reduces load on PostgreSQL for high-read operations (leaderboards, network stats).  
+  • Service workers cache static assets, cutting down load times and enabling offline use.
+
+- **Testing Strategy**
+  • **Unit tests** for UI components and smart contract logic.  
+  • **Integration tests** for tRPC endpoints and database workflows.  
+  • **Lighthouse audits** for PWA installability, performance, and accessibility.
 
 ## 6. Conclusion and Overall Tech Stack Summary
-In building **codeguide-starter**, we chose technologies that:
+Vibe Check’s stack brings together modern, battle-tested tools that work in harmony to deliver a seamless user experience:
 
-- Align with modern web standards (Next.js, React, TypeScript).
-- Provide a clear, file-based project structure for rapid onboarding.
-- Offer built-in support for server-side rendering, API routes, and static assets.
-- Emphasize security through password hashing, session management, and safe defaults.
-- Enable easy scaling and future enhancements via modular code and optional integrations.
+- A responsive, installable PWA powered by Next.js, service workers, and a dark-mode theme.  
+- Wallet-based authentication with RainbowKit and wagmi for secure, password-free logins.  
+- A type-safe, monorepo architecture (Express + tRPC) ensuring consistent data models across frontend and backend.  
+- Reliable data storage with PostgreSQL (Drizzle ORM) plus Redis caching for fast access to popular data.  
+- Web3 integrations via Alchemy and Foundry for NFT badge minting, and flexible Farcaster Frames support for shareable visuals.  
+- Containerized development (Docker) and automated CI/CD pipelines (GitHub Actions + Akash) for reliable builds and deployments.
 
-This stack strikes a balance between simplicity for newcomers and flexibility for experienced teams. It accelerates development of a secure authentication flow and a polished dashboard, while leaving room to plug in databases, test suites, and advanced features as the project grows.
+This combination of technologies aligns perfectly with the project’s goals: providing a fast, secure, and engaging daily crypto sentiment tracker that users can install like an app and interact with on any device.
